@@ -2,29 +2,27 @@
 
 ## Objective
 
-Use Terraform to provision and manage cloud infrastructure using Infrastructure as Code (IaC).
+Use Terraform to provision and manage local infrastructure using Docker as the infrastructure provider.
 
 ## Tasks Completed
 
-- Installed and configured Terraform
-- Configured AWS as the cloud provider
+- Installed Terraform
+- Configured the Docker provider
 - Created Terraform configuration files
-- Provisioned a virtual machine using Amazon EC2
-- Created networking resources using Amazon VPC
-- Created a subnet and security group
-- Provisioned storage using Amazon S3
-- Used Terraform to plan and deploy infrastructure
+- Provisioned an Nginx container using Terraform
+- Created a Docker network
+- Created persistent Docker storage
+- Built infrastructure using `terraform plan`
+- Deployed infrastructure using `terraform apply`
 - Updated infrastructure using Terraform
-- Destroyed infrastructure using Terraform
+- Destroyed infrastructure using `terraform destroy`
 
 ## Technologies Used
 
 - Terraform
-- Amazon Web Services (AWS)
-- Amazon EC2
-- Amazon VPC
-- Amazon S3
-- AWS CLI
+- Docker
+- Nginx
+- Infrastructure as Code (IaC)
 
 ## Project Structure
 
@@ -34,6 +32,33 @@ task5/
 └── README.md
 ```
 
+## Infrastructure
+
+Terraform provisions the following local resources:
+
+```text
+Terraform
+│
+├── Nginx Docker Image
+│
+├── Docker Network
+│
+├── Docker Volume
+│
+└── Nginx Docker Container
+        │
+        └── Port 8080
+```
+
+### Resources
+
+| Resource | Purpose |
+|---|---|
+| Docker Image | Nginx web server image |
+| Docker Container | Containerized application |
+| Docker Network | Container networking |
+| Docker Volume | Persistent storage |
+
 ## Terraform Configuration
 
 The infrastructure is defined in:
@@ -42,15 +67,20 @@ The infrastructure is defined in:
 main.tf
 ```
 
-The configuration includes:
+The configuration uses the Docker Terraform provider:
 
-- AWS provider
-- VPC
-- Subnet
-- Security Group
-- EC2 instance
-- S3 bucket
-- Terraform outputs
+```hcl
+terraform {
+  required_providers {
+    docker = {
+      source  = "kreuzwerker/docker"
+      version = "~> 3.0"
+    }
+  }
+}
+
+provider "docker" {}
+```
 
 ## Initialize Terraform
 
@@ -58,7 +88,7 @@ The configuration includes:
 terraform init
 ```
 
-This initializes Terraform and downloads the required AWS provider.
+This initializes the Terraform project and downloads the Docker provider.
 
 ## Validate Configuration
 
@@ -72,13 +102,13 @@ Expected result:
 Success! The configuration is valid.
 ```
 
-## Preview Infrastructure Changes
+## Preview Infrastructure
 
 ```bash
 terraform plan
 ```
 
-This displays the resources that Terraform will create or modify.
+Terraform displays the resources that will be created or modified.
 
 ## Deploy Infrastructure
 
@@ -92,45 +122,75 @@ Confirm with:
 yes
 ```
 
-Terraform then provisions the configured AWS infrastructure.
+After successful deployment, Terraform displays:
+
+```text
+Apply complete!
+```
+
+## Verify Docker Resources
+
+Check the running container:
+
+```bash
+docker ps
+```
+
+Check the Docker network:
+
+```bash
+docker network ls
+```
+
+Check the Docker volume:
+
+```bash
+docker volume ls
+```
+
+## Verify Web Application
+
+The Nginx server is accessible through:
+
+```text
+http://localhost:8080
+```
+
+Opening this URL displays the Nginx welcome page.
 
 ## Manage Infrastructure Updates
 
-Infrastructure changes can be made by modifying `main.tf`.
+Terraform can detect and apply infrastructure changes.
 
-For example, changing the EC2 instance type:
+For example, changing the host port in `main.tf`:
 
 ```hcl
-instance_type = "t3.micro"
+external = 8081
 ```
 
-Then run:
+Preview the change:
 
 ```bash
 terraform plan
+```
+
+Apply the update:
+
+```bash
 terraform apply
 ```
 
-Terraform identifies and applies only the required infrastructure changes.
-
-## View Outputs
-
-After deployment:
-
-```bash
-terraform output
-```
-
-Example outputs include:
+The application can then be accessed at:
 
 ```text
-instance_public_ip
-bucket_name
+http://localhost:8081
 ```
+
+This demonstrates infrastructure management through Terraform.
 
 ## Destroy Infrastructure
 
-After completing testing:
+After testing:
 
 ```bash
 terraform destroy
@@ -142,7 +202,7 @@ Confirm with:
 yes
 ```
 
-This removes the infrastructure created by Terraform.
+Terraform removes the infrastructure it created.
 
 ## Useful Terraform Commands
 
@@ -155,34 +215,34 @@ terraform output
 terraform destroy
 ```
 
-## Infrastructure
-
-The Terraform configuration provisions:
+## Infrastructure Lifecycle
 
 ```text
-AWS
-│
-├── VPC
-│   └── Subnet
-│       └── Security Group
-│           └── EC2 Instance
-│
-└── S3 Bucket
+Terraform Configuration
+        ↓
+   terraform init
+        ↓
+  terraform validate
+        ↓
+    terraform plan
+        ↓
+   terraform apply
+        ↓
+ Infrastructure Created
+        ↓
+ Configuration Updated
+        ↓
+    terraform plan
+        ↓
+   terraform apply
+        ↓
+ Infrastructure Updated
+        ↓
+  terraform destroy
+        ↓
+ Infrastructure Removed
 ```
-
-## Bonus - Terraform Modules
-
-Terraform modules can be used to organize reusable infrastructure components such as:
-
-```text
-modules/
-├── networking/
-├── compute/
-└── storage/
-```
-
-This allows infrastructure configurations to be reused across multiple environments.
 
 ## Result
 
-AWS cloud infrastructure was successfully provisioned and managed using Terraform. The project demonstrates Infrastructure as Code through automated creation, modification, and destruction of compute, networking, and storage resources.
+Infrastructure was successfully defined and managed as code using Terraform and Docker. An Nginx container, Docker network, and persistent storage were provisioned, updated, tested, and removed using standard Terraform commands.
